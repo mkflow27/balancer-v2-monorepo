@@ -20,7 +20,6 @@ import "./interfaces/IEulerTokenMinimal.sol";
 import "../LinearPool.sol";
 
 contract EulerLinearPool is LinearPool {
-
     // this is to be the euler LinearPool
     IEulerTokenMinimal private immutable _eulerToken;
 
@@ -56,6 +55,11 @@ contract EulerLinearPool is LinearPool {
         IEulerTokenMinimal eulerToken = IEulerTokenMinimal(address(args.wrappedToken));
 
         _eulerToken = eulerToken;
+        uint256 mainTokenDecimals = IEulerTokenMinimal(address(args.mainToken)).decimals();
+
+        // Euler tokens always have 18 decimals
+        // https://docs.euler.finance/developers/getting-started/contract-reference#decimals
+        _digitsDifference = 18 - mainTokenDecimals;
 
         _require(address(args.mainToken) == eulerToken.underlyingAsset(), Errors.TOKENS_MISMATCH);
     }
@@ -76,7 +80,7 @@ contract EulerLinearPool is LinearPool {
         // see: https://github.com/aave/protocol-v2/blob/ac58fea62bb8afee23f66197e8bce6d79ecda292/contracts/protocol/tokenization/StaticATokenLM.sol#L255-L257
         return _eulerToken.convertBalanceToUnderlying(1e18);
 
-        // This function returns a 18 decimal fixed point number, but `rate` has 27 decimals (i.e. a 'ray' value)
-        // so we need to convert it.
+        uint256 rate = _eulerToken.convertBalanceToUnderlying(1e18 * 10**_digitsDifference);
+        return rate;
     }
 }

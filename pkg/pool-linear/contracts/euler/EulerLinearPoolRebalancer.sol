@@ -36,21 +36,32 @@ contract EulerLinearPoolRebalancer is LinearPoolRebalancer {
     function _wrapTokens(uint256 amount) internal override {
         // No referral code, depositing from underlying (i.e. DAI, USDC, etc. instead of aDAI or aUSDC). Before we can
         // deposit however, we need to approve the wrapper in the underlying token.
-        _mainToken.safeApprove(address(_wrappedToken), amount);
+
+        _mainToken.safeApprove(0x27182842E098f60e3D576794A5bFFb0777E025d3, amount);
         IEulerTokenMinimal(address(_wrappedToken)).deposit(0, amount);
     }
 
     function _unwrapTokens(uint256 amount) internal override {
         // Withdrawing into underlying (i.e. DAI, USDC, etc. instead of aDAI or aUSDC). Approvals are not necessary here
         // as the wrapped token is simply burnt.
-        IEulerTokenMinimal(address(_wrappedToken)).withdraw(0, amount);
+
+        // Transfer underlying tokens from Euler pool to sender, and decrease account's eTokens
+        // function withdraw(uint subAccountId, uint amount) external;
+        // param: subAccountId: 0 for primary, 1-255 for a sub-account
+        // param: amount: In underlying units (use max uint256 for full pool balance)
+        // https://github.com/euler-xyz/euler-contracts/blob/master/contracts/modules/EToken.sol#L177
+
+        uint256 underlyingAmount = IEulerTokenMinimal(address(_wrappedToken)).convertBalanceToUnderlying(amount);
+
+        IEulerTokenMinimal(address(_wrappedToken)).withdraw(0, underlyingAmount);
     }
 
     function _getRequiredTokensToWrap(uint256 wrappedAmount) internal view override returns (uint256) {
-        // staticToDynamic returns how many main tokens will be returned when unwrapping. Since there's fixed point
-        // divisions and multiplications with rounding involved, this value might be off by one. We add one to ensure
-        // the returned value will always be enough to get `wrappedAmount` when unwrapping. This might result in some
-        // dust being left in the Rebalancer.
-        return IEulerTokenMinimal(address(_wrappedToken)).convertBalanceToUnderlying(wrappedAmount) + 1;
+        // Convert an eToken balance to an underlying amount, taking into account current exchange rate
+        // input: balance: eToken balance, in internal book-keeping units (18 decimals)
+        // returns: Amount in underlying units, (same decimals as underlying token)
+        // https://docs.euler.finance/developers/getting-started/contract-reference
+        uint256 amnt = IEulerTokenMinimal(address(_wrappedToken)).convertBalanceToUnderlying(wrappedAmount);
+        return amnt + 1;
     }
 }

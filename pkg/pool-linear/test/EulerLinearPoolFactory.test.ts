@@ -8,11 +8,10 @@ import TokenList from '@balancer-labs/v2-helpers/src/models/tokens/TokenList';
 import * as expectEvent from '@balancer-labs/v2-helpers/src/test/expectEvent';
 import { fp, FP_ZERO } from '@balancer-labs/v2-helpers/src/numbers';
 import { deploy, deployedAt } from '@balancer-labs/v2-helpers/src/contract';
-import { MAX_UINT112, ZERO_ADDRESS } from '@balancer-labs/v2-helpers/src/constants';
+import { MAX_UINT112 } from '@balancer-labs/v2-helpers/src/constants';
 import { advanceTime, currentTimestamp, MONTH } from '@balancer-labs/v2-helpers/src/time';
 import Token from '@balancer-labs/v2-helpers/src/models/tokens/Token';
 import { sharedBeforeEach } from '@balancer-labs/v2-common/sharedBeforeEach';
-
 
 describe('EulerLinearPoolFactory', function () {
   let vault: Vault, tokens: TokenList, factory: Contract;
@@ -60,14 +59,14 @@ describe('EulerLinearPoolFactory', function () {
     return deployedAt('LinearPool', event.args.pool);
   }
 
-  describe('constructor arguments',  () => {
+  describe('constructor arguments', () => {
     let pool: Contract;
 
-    sharedBeforeEach('create pool',async () => {
+    sharedBeforeEach('create pool', async () => {
       pool = await createPool();
-    })
+    });
 
-    it('sets the vault',async () => {
+    it('sets the vault', async () => {
       expect(await pool.getVault()).to.equal(vault.address);
     });
 
@@ -132,7 +131,7 @@ describe('EulerLinearPoolFactory', function () {
       expect(targets.lowerTarget).to.be.equal(FP_ZERO);
       expect(targets.upperTarget).to.be.equal(UPPER_TARGET);
     });
-  })
+  });
 
   describe('with a created pool', () => {
     let pool: Contract;

@@ -24,6 +24,8 @@ import "@balancer-labs/v2-interfaces/contracts/pool-linear/ILinearPool.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/openzeppelin/SafeERC20.sol";
 
+import "@balancer-labs/v2-interfaces/contracts/solidity-utils/openzeppelin/IERC20.sol";
+
 abstract contract LinearPoolRebalancer {
     using SafeERC20 for IERC20;
 
@@ -87,6 +89,7 @@ abstract contract LinearPoolRebalancer {
         // rounding error. Values in the order of a few wei are typically sufficient.
 
         _mainToken.safeTransferFrom(msg.sender, address(this), extraMain);
+
         return _rebalance(recipient);
     }
 
@@ -101,7 +104,6 @@ abstract contract LinearPoolRebalancer {
         // We can assume that the managed balance is zero (since we're the Pool's Asset Manager and we always set it to
         // zero), and work with the cash directly as if it were the total balance.
         (uint256 mainTokenBalance, , , ) = _vault.getPoolTokenInfo(_poolId, _mainToken);
-
         if (mainTokenBalance < desiredMainTokenBalance) {
             return _rebalanceLackOfMainToken(desiredMainTokenBalance - mainTokenBalance, recipient);
         } else if (mainTokenBalance > desiredMainTokenBalance) {
@@ -113,6 +115,7 @@ abstract contract LinearPoolRebalancer {
         // The Pool needs to increase the main token balance, so we prepare a swap where we provide the missing main
         // token amount in exchange for wrapped tokens, that is, the main token is the token in. Since we know this
         // amount, this is a 'given in' swap.
+
         IVault.SingleSwap memory swap = IVault.SingleSwap({
             poolId: _poolId,
             kind: IVault.SwapKind.GIVEN_IN,
@@ -134,11 +137,9 @@ abstract contract LinearPoolRebalancer {
         // The amounts involved will be the exact same amounts as the one in the swap above, meaning the overall state
         // transition will be the same, except we will never actually call the Linear Pool. However, since the Linear
         // Pool's `onSwap` function is `view`, this is irrelevant.
-
         _withdrawFromPool(_wrappedToken, wrappedAmountOut);
         _unwrapTokens(wrappedAmountOut);
         _depositToPool(_mainToken, missingMainAmount);
-
         // This contract will now hold excess main token, since unwrapping `wrappedAmountOut` should have resulted in
         // more than `missingMainAmount` being obtained. These are sent to the caller to refund the gas cost.
         uint256 reward = _mainToken.balanceOf(address(this));
@@ -150,6 +151,7 @@ abstract contract LinearPoolRebalancer {
         // The Pool needs to reduce its main token balance, so we do a swap where we take the excess main token amount
         // and send wrapped tokens in exchange, that is, the main token is the token out. Since we know this amount,
         // this is a 'given out' swap.
+
         IVault.SingleSwap memory swap = IVault.SingleSwap({
             poolId: _poolId,
             kind: IVault.SwapKind.GIVEN_OUT,
@@ -164,6 +166,7 @@ abstract contract LinearPoolRebalancer {
         // `excessMainAmount`, with the difference originating from swap fees.
 
         IVault.FundManagement memory funds; // This is unused in the query, so we don't bother initializing it.
+
         uint256 wrappedAmountIn = _queries.querySwap(swap, funds);
 
         // Since we lack the wrapped tokens required to actually execute the swap, we instead use our Asset Manager

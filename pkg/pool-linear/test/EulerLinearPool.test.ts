@@ -64,22 +64,24 @@ describe('EulerLinearPool', function () {
     pool = await LinearPool.deployedAt(event.args.pool);
   });
 
-  describe('asset managers',async () => {
-    it('sets the same asset manager for main and wrapped token',async () => {
+  describe('asset managers', async () => {
+    it('sets the same asset manager for main and wrapped token', async () => {
       const poolId = await pool.getPoolId();
 
       const { assetManager: firstAssetManager } = await vault.getPoolTokenInfo(poolId, tokens.first);
       const { assetManager: secondAssetManager } = await vault.getPoolTokenInfo(poolId, tokens.second);
+
+      expect(firstAssetManager).to.equal(secondAssetManager);
     });
 
-    it('sets the no asset manager for the BPT',async () => {
+    it('sets the no asset manager for the BPT', async () => {
       const poolId = await pool.getPoolId();
       const { assetManager } = await vault.getPoolTokenInfo(poolId, pool.address);
       expect(assetManager).to.equal(ZERO_ADDRESS);
     });
 
     describe('getWrappedTokenRate', () => {
-      it('returns the expected value',async () => {
+      it('returns the expected value', async () => {
         expect(await pool.getWrappedTokenRate()).to.be.eq(bn(1e18));
 
         // change exchangeRate at the EulerToken
@@ -90,12 +92,12 @@ describe('EulerLinearPool', function () {
         await mockLendingPool.setExchangeRateMultiplicator(1);
         expect(await pool.getWrappedTokenRate()).to.be.eq(bn(1e18));
       });
-    })
+    });
 
     describe('constructor', () => {
       it('reverts if the mainToken is not the ASSET of the wrappedToken', async () => {
         const otherToken = await Token.create('USDC');
-  
+
         await expect(
           poolFactory.create(
             'Balancer Pool Token',
@@ -109,5 +111,5 @@ describe('EulerLinearPool', function () {
         ).to.be.revertedWith('TOKENS_MISMATCH');
       });
     });
-  })
+  });
 });
