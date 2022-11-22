@@ -37,6 +37,7 @@ contract EulerLinearPoolRebalancer is LinearPoolRebalancer {
         // No referral code, depositing from underlying (i.e. DAI, USDC, etc. instead of aDAI or aUSDC). Before we can
         // deposit however, we need to approve the wrapper in the underlying token.
 
+        // approve Euler Mainnet
         _mainToken.safeApprove(0x27182842E098f60e3D576794A5bFFb0777E025d3, amount);
         IEulerTokenMinimal(address(_wrappedToken)).deposit(0, amount);
     }
@@ -45,14 +46,13 @@ contract EulerLinearPoolRebalancer is LinearPoolRebalancer {
         // Withdrawing into underlying (i.e. DAI, USDC, etc. instead of aDAI or aUSDC). Approvals are not necessary here
         // as the wrapped token is simply burnt.
 
+        uint256 underlyingAmount = IEulerTokenMinimal(address(_wrappedToken)).convertBalanceToUnderlying(amount);
+
         // Transfer underlying tokens from Euler pool to sender, and decrease account's eTokens
         // function withdraw(uint subAccountId, uint amount) external;
         // param: subAccountId: 0 for primary, 1-255 for a sub-account
         // param: amount: In underlying units (use max uint256 for full pool balance)
         // https://github.com/euler-xyz/euler-contracts/blob/master/contracts/modules/EToken.sol#L177
-
-        uint256 underlyingAmount = IEulerTokenMinimal(address(_wrappedToken)).convertBalanceToUnderlying(amount);
-
         IEulerTokenMinimal(address(_wrappedToken)).withdraw(0, underlyingAmount);
     }
 

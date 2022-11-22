@@ -11,9 +11,6 @@ import { MAX_UINT256 } from '@balancer-labs/v2-helpers/src/constants';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import { SwapKind } from '@balancer-labs/balancer-js';
 
-// to adapt the fork test, do:
-//
-
 describeForkTest('EulerLinearPoolFactory', 'mainnet', 15961400, function () {
   let owner: SignerWithAddress, holder: SignerWithAddress, other: SignerWithAddress;
   let factory: Contract, vault: Contract, usdc: Contract;
@@ -71,10 +68,6 @@ describeForkTest('EulerLinearPoolFactory', 'mainnet', 15961400, function () {
 
       const { cash } = await vault.getPoolTokenInfo(poolId, USDC);
       const scaledCash = cash.mul(USDC_SCALING);
-
-      // the fee parameter represents the fees accumulated to the pool
-      // it is a number with 18 decimals with divided by the "understandable"
-      // swap fee percentage
 
       let fees;
       if (scaledCash.gt(upperTarget)) {

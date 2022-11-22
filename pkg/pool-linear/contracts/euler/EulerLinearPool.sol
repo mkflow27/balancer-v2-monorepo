@@ -20,8 +20,8 @@ import "./interfaces/IEulerTokenMinimal.sol";
 import "../LinearPool.sol";
 
 contract EulerLinearPool is LinearPool {
-    // this is to be the euler LinearPool
     IEulerTokenMinimal private immutable _eulerToken;
+    uint256 private immutable _digitsDifference;
 
     struct ConstructorArgs {
         IVault vault;
@@ -74,12 +74,10 @@ contract EulerLinearPool is LinearPool {
     }
 
     function _getWrappedTokenRate() internal view override returns (uint256) {
-        // This pulls in the implementation of `rate` used in the StaticAToken contract
-        // except avoiding storing relevant variables in storage for gas reasons.
-        // solhint-disable-next-line max-line-length
-        // see: https://github.com/aave/protocol-v2/blob/ac58fea62bb8afee23f66197e8bce6d79ecda292/contracts/protocol/tokenization/StaticATokenLM.sol#L255-L257
-        return _eulerToken.convertBalanceToUnderlying(1e18);
-
+        // https://github.com/euler-xyz/euler-contracts/blob/master/contracts/modules/EToken.sol#L104
+        // Convert an eToken balance to an underlying amount, taking into account current exchange rate
+        // @param balance eToken balance, in internal book-keeping units (18 decimals)
+        // @return Amount in underlying units, (same decimals as underlying token)
         uint256 rate = _eulerToken.convertBalanceToUnderlying(1e18 * 10**_digitsDifference);
         return rate;
     }
