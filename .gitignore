@@ -25,6 +25,3 @@ pkg/balancer-js/src/typechain/*
 # Forge
 forge-artifacts/
 forge-cache/
-
-# Mac 
-.DS_Store
