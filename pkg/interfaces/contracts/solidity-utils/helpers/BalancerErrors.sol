@@ -12,7 +12,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity ^0.7.0;
+pragma solidity >=0.7.0 <0.9.0;
 
 // solhint-disable
 
@@ -123,6 +123,7 @@ library Errors {
     uint256 internal constant UNSORTED_TOKENS = 102;
     uint256 internal constant INPUT_LENGTH_MISMATCH = 103;
     uint256 internal constant ZERO_TOKEN = 104;
+    uint256 internal constant INSUFFICIENT_DATA = 105;
 
     // Shared pools
     uint256 internal constant MIN_TOKENS = 200;
@@ -196,6 +197,7 @@ library Errors {
     uint256 internal constant ADD_OR_REMOVE_BPT = 354;
     uint256 internal constant INVALID_CIRCUIT_BREAKER_BOUNDS = 355;
     uint256 internal constant CIRCUIT_BREAKER_TRIPPED = 356;
+    uint256 internal constant MALICIOUS_QUERY_REVERT = 357;
 
     // Lib
     uint256 internal constant REENTRANCY = 400;
@@ -280,6 +282,9 @@ library Errors {
     uint256 internal constant FLASH_LOAN_FEE_PERCENTAGE_TOO_HIGH = 601;
     uint256 internal constant INSUFFICIENT_FLASH_LOAN_FEE_AMOUNT = 602;
     uint256 internal constant AUM_FEE_PERCENTAGE_TOO_HIGH = 603;
+
+    // FeeSplitter
+    uint256 internal constant SPLITTER_FEE_PERCENTAGE_TOO_HIGH = 700;
 
     // Misc
     uint256 internal constant UNIMPLEMENTED = 998;
