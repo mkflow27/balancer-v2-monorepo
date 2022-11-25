@@ -16,10 +16,13 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/IEulerTokenMinimal.sol";
+import "@balancer-labs/v2-pool-utils/contracts/lib/ExternalCallLib.sol";
+import "@balancer-labs/v2-pool-utils/contracts/Version.sol";
+
 
 import "../LinearPool.sol";
 
-contract EulerLinearPool is LinearPool {
+contract EulerLinearPool is LinearPool, Version {
     IEulerTokenMinimal private immutable _eulerToken;
     uint256 private immutable _digitsDifference;
 
@@ -35,6 +38,7 @@ contract EulerLinearPool is LinearPool {
         uint256 pauseWindowDuration;
         uint256 bufferPeriodDuration;
         address owner;
+        string version;
     }
 
     constructor(ConstructorArgs memory args)
@@ -51,6 +55,7 @@ contract EulerLinearPool is LinearPool {
             args.bufferPeriodDuration,
             args.owner
         )
+        Version(args.version)
     {
         IEulerTokenMinimal eulerToken = IEulerTokenMinimal(address(args.wrappedToken));
 
@@ -78,7 +83,10 @@ contract EulerLinearPool is LinearPool {
         // Convert an eToken balance to an underlying amount, taking into account current exchange rate
         // @param balance eToken balance, in internal book-keeping units (18 decimals)
         // @return Amount in underlying units, (same decimals as underlying token)
-        uint256 rate = _eulerToken.convertBalanceToUnderlying(1e18 * 10**_digitsDifference);
-        return rate;
+        try _eulerToken.convertBalanceToUnderlying(1e18 * 10**_digitsDifference) returns (uint256 rate) {
+            return rate;
+        } catch (bytes memory revertData) {
+            ExternalCallLib.bubbleUpNonMaliciousRevert(revertData);
+        }
     }
 }

@@ -32,12 +32,7 @@ contract MockEulerToken is TestToken{
 
     uint256 public exchangeRateMultiplicator;
 
-    uint256 public tempStorage;
-    uint256 public tempStorage2;
-    uint256 public tempStorage3;
-    uint256 public tempStorage4;
-    uint256 public tempStorage5;
-
+    // solhint-disable var-name-mixedcase
     address public immutable ASSET;
     constructor(
         string memory name,
@@ -47,20 +42,6 @@ contract MockEulerToken is TestToken{
     ) TestToken(name, symbol, decimals) {
         ASSET = underlyingAsset;
         exchangeRateMultiplicator = 1;
-    }
-
-    function deposit(uint subAccountId, uint amount) external {
-        // what are the main functions this Mock needs to implement?
-        // basically the deposit and withdraw functions of the Euler protocol
-        // 
-        // TODO: How to handle approval?
-        tempStorage = subAccountId;
-        tempStorage2 = amount;
-    }
-
-    function withdraw(uint subAccountId, uint amount) external {
-        tempStorage3 = subAccountId;
-        tempStorage4 = amount;
     }
 
     function convertBalanceToUnderlying(uint balance) external view returns (uint) {
