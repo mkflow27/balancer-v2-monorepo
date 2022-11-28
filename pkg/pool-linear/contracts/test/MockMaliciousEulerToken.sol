@@ -34,9 +34,15 @@ contract MockMaliciousEulerToken is TestToken, MaliciousQueryReverter{
 
     uint256 public exchangeRateMultiplicator;
 
+    address public immutable ASSET;
     constructor(
-    ) TestToken("malicious euler token", "maleusdc", 18) {
+        string memory name,
+        string memory symbol,
+        uint8 decimals,
+        address asset
+    ) TestToken(name, symbol, decimals) {
         exchangeRateMultiplicator = 1;
+        ASSET = asset;
     }
 
     function convertBalanceToUnderlying(uint balance) external view returns (uint) {
@@ -44,9 +50,12 @@ contract MockMaliciousEulerToken is TestToken, MaliciousQueryReverter{
         return balance*exchangeRateMultiplicator;
     }
 
-
     function setExchangeRateMultiplicator(uint256 _exchangeRateMultiplicator) external {
         require(_exchangeRateMultiplicator < 3, "Cannot set exchangeRateMultiplicator bigger 3");
         exchangeRateMultiplicator = _exchangeRateMultiplicator;
+    }
+
+    function underlyingAsset() external view returns (address) {
+        return ASSET;
     }
 }

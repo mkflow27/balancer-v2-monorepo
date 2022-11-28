@@ -19,7 +19,6 @@ import "./interfaces/IEulerTokenMinimal.sol";
 import "@balancer-labs/v2-pool-utils/contracts/lib/ExternalCallLib.sol";
 import "@balancer-labs/v2-pool-utils/contracts/Version.sol";
 
-
 import "../LinearPool.sol";
 
 contract EulerLinearPool is LinearPool, Version {

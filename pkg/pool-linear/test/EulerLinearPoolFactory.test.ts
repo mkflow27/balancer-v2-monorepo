@@ -17,6 +17,7 @@ describe('EulerLinearPoolFactory', function () {
   let vault: Vault, tokens: TokenList, factory: Contract;
   let creationTime: BigNumber, owner: SignerWithAddress;
   let mainToken: Token, wrappedToken: Token;
+  let factoryVersion: string, poolVersion: string;
 
   const NAME = 'Euler Balancer Linear Pool Token';
   const SYMBOL = 'ELPT';
@@ -32,13 +33,25 @@ describe('EulerLinearPoolFactory', function () {
   sharedBeforeEach('deploy factory & tokens', async () => {
     vault = await Vault.create();
     const queries = await deploy('v2-standalone-utils/BalancerQueries', { args: [vault.address] });
+    factoryVersion = JSON.stringify({
+      name: 'EulerLinearPoolFactory',
+      version: '3',
+      deployment: 'test-deployment',
+    });
+    poolVersion = JSON.stringify({
+      name: 'EulerLinearPool',
+      version: '1',
+      deployment: 'test-deployment',
+    });
     factory = await deploy('EulerLinearPoolFactory', {
-      args: [vault.address, vault.getFeesProvider().address, queries.address],
+      args: [vault.address, vault.getFeesProvider().address, queries.address, factoryVersion, poolVersion],
     });
     creationTime = await currentTimestamp();
 
     mainToken = await Token.create('DAI');
-    const wrappedTokenInstance = await deploy('MockEulerToken', { args: ['cDAI', 'cDAI', 18, mainToken.address] });
+    const wrappedTokenInstance = await deploy('MockMaliciousEulerToken', {
+      args: ['cDAI', 'cDAI', 18, mainToken.address],
+    });
     wrappedToken = await Token.deployedAt(wrappedTokenInstance.address);
 
     tokens = new TokenList([mainToken, wrappedToken]).sort();
@@ -64,9 +77,11 @@ describe('EulerLinearPoolFactory', function () {
 
     sharedBeforeEach('create pool', async () => {
       pool = await createPool();
+      console.log('created pool');
     });
 
     it('sets the vault', async () => {
+      console.log('setting the vault');
       expect(await pool.getVault()).to.equal(vault.address);
     });
 
@@ -93,7 +108,7 @@ describe('EulerLinearPoolFactory', function () {
       // We only check the first token, but this will be the asset manager for both main and wrapped
       const { assetManager } = await vault.getPoolTokenInfo(poolId, tokens.first);
 
-      const rebalancer = await deployedAt('AaveLinearPoolRebalancer', assetManager);
+      const rebalancer = await deployedAt('EulerLinearPoolRebalancer', assetManager);
 
       expect(await rebalancer.getPool()).to.equal(pool.address);
     });

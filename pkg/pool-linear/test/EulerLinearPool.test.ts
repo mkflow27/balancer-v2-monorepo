@@ -11,9 +11,17 @@ import Token from '@balancer-labs/v2-helpers/src/models/tokens/Token';
 import TokenList from '@balancer-labs/v2-helpers/src/models/tokens/TokenList';
 import LinearPool from '@balancer-labs/v2-helpers/src/models/pools/linear/LinearPool';
 
-import { deploy } from '@balancer-labs/v2-helpers/src/contract';
+import { deploy, deployedAt } from '@balancer-labs/v2-helpers/src/contract';
 import Vault from '@balancer-labs/v2-helpers/src/models/vault/Vault';
-import { ZERO_ADDRESS } from '@balancer-labs/v2-helpers/src/constants';
+import { MAX_UINT256, ZERO_ADDRESS } from '@balancer-labs/v2-helpers/src/constants';
+import { SwapKind } from '@balancer-labs/balancer-js';
+
+enum RevertType {
+  DoNotRevert,
+  NonMalicious,
+  MaliciousSwapQuery,
+  MaliciousJoinExitQuery,
+}
 
 describe('EulerLinearPool', function () {
   let vault: Vault;
@@ -30,7 +38,9 @@ describe('EulerLinearPool', function () {
 
   sharedBeforeEach('deploy tokens', async () => {
     mainToken = await Token.create('DAI');
-    const wrappedTokenInstance = await deploy('MockEulerToken', { args: ['cDAI,', 'cDAI', 18, mainToken.address] });
+    const wrappedTokenInstance = await deploy('MockMaliciousEulerToken', {
+      args: ['cDAI,', 'cDAI', 18, mainToken.address],
+    });
     wrappedToken = await Token.deployedAt(wrappedTokenInstance.address);
 
     tokens = new TokenList([mainToken, wrappedToken]).sort();
@@ -43,8 +53,9 @@ describe('EulerLinearPool', function () {
     vault = await Vault.create();
     const queries = await deploy('v2-standalone-utils/BalancerQueries', { args: [vault.address] });
     poolFactory = await deploy('EulerLinearPoolFactory', {
-      args: [vault.address, vault.getFeesProvider().address, queries.address],
+      args: [vault.address, vault.getFeesProvider().address, queries.address, 'factoryVersion', 'poolVersion'],
     });
+    console.log('test');
   });
 
   sharedBeforeEach('deploy and initialize pool', async () => {
@@ -64,6 +75,24 @@ describe('EulerLinearPool', function () {
     pool = await LinearPool.deployedAt(event.args.pool);
   });
 
+  describe('constructor', () => {
+    it('reverts if the mainToken is not the ASSET of the wrappedToken', async () => {
+      const otherToken = await Token.create('USDC');
+
+      await expect(
+        poolFactory.create(
+          'Balancer Pool Token',
+          'BPT',
+          otherToken.address,
+          wrappedToken.address,
+          bn(0),
+          POOL_SWAP_FEE_PERCENTAGE,
+          owner.address
+        )
+      ).to.be.revertedWith('TOKENS_MISMATCH');
+    });
+  });
+
   describe('asset managers', async () => {
     it('sets the same asset manager for main and wrapped token', async () => {
       const poolId = await pool.getPoolId();
@@ -79,8 +108,10 @@ describe('EulerLinearPool', function () {
       const { assetManager } = await vault.getPoolTokenInfo(poolId, pool.address);
       expect(assetManager).to.equal(ZERO_ADDRESS);
     });
+  });
 
-    describe('getWrappedTokenRate', () => {
+  describe('getWrappedTokenRate', () => {
+    context('under normal operation', () => {
       it('returns the expected value', async () => {
         expect(await pool.getWrappedTokenRate()).to.be.eq(bn(1e18));
 
@@ -94,21 +125,61 @@ describe('EulerLinearPool', function () {
       });
     });
 
-    describe('constructor', () => {
-      it('reverts if the mainToken is not the ASSET of the wrappedToken', async () => {
-        const otherToken = await Token.create('USDC');
+    context('when Euler reverts maliciously to impersonate a swap query', () => {
+      sharedBeforeEach('make Euler lending pool start reverting', async () => {
+        await mockLendingPool.setRevertType(RevertType.MaliciousSwapQuery);
+      });
 
-        await expect(
-          poolFactory.create(
-            'Balancer Pool Token',
-            'BPT',
-            otherToken.address,
-            wrappedToken.address,
-            bn(0),
-            POOL_SWAP_FEE_PERCENTAGE,
-            owner.address
-          )
-        ).to.be.revertedWith('TOKENS_MISMATCH');
+      it('reverts with MALICIOUS_QUERY_REVERT', async () => {
+        await expect(pool.getWrappedTokenRate()).to.be.revertedWith('MALICIOUS_QUERY_REVERT');
+      });
+    });
+
+    context('when Euler reverts maliciously to impersonate a join/exit query', () => {
+      sharedBeforeEach('make Euler lending pool start reverting', async () => {
+        await mockLendingPool.setRevertType(RevertType.MaliciousJoinExitQuery);
+      });
+
+      it('reverts with MALICIOUS_QUERY_REVERT', async () => {
+        await expect(pool.getWrappedTokenRate()).to.be.revertedWith('MALICIOUS_QUERY_REVERT');
+      });
+    });
+  });
+
+  describe('rebalancing', () => {
+    context('when Euler reverts maliciously to impersonate a swap query', () => {
+      let rebalancer: Contract;
+      sharedBeforeEach('provide initial liquidity to pool', async () => {
+        const poolId = await pool.getPoolId();
+
+        await tokens.approve({ to: vault, amount: fp(100), from: lp });
+        await vault.instance.connect(lp).swap(
+          {
+            poolId,
+            kind: SwapKind.GivenIn,
+            assetIn: mainToken.address,
+            assetOut: pool.address,
+            amount: fp(10),
+            userData: '0x',
+          },
+          { sender: lp.address, fromInternalBalance: false, recipient: lp.address, toInternalBalance: false },
+          0,
+          MAX_UINT256
+        );
+      });
+
+      sharedBeforeEach('deploy and initialize pool', async () => {
+        const poolId = await pool.getPoolId();
+        const { assetManager } = await vault.getPoolTokenInfo(poolId, tokens.first);
+        rebalancer = await deployedAt('EulerLinearPoolRebalancer', assetManager);
+      });
+
+      sharedBeforeEach('make Euler lending pool start reverting', async () => {
+        await mockLendingPool.setRevertType(RevertType.MaliciousSwapQuery);
+      });
+
+      it('reverts with MALICIOUS_QUERY_REVERT', async () => {
+        await expect(rebalancer.rebalance(trader.address)).to.be.revertedWith('MALICIOUS_QUERY_REVERT');
       });
     });
   });

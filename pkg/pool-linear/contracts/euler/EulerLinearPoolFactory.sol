@@ -36,7 +36,7 @@ contract EulerLinearPoolFactory is
     Version,
     BasePoolFactory,
     ReentrancyGuard,
-    FactoryWidePauseWindow 
+    FactoryWidePauseWindow
 {
     // Used for create2 deployments
     uint256 private _nextRebalancerSalt;
