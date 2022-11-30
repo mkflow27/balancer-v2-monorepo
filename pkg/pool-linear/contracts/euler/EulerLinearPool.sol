@@ -82,6 +82,8 @@ contract EulerLinearPool is LinearPool, Version {
         // Convert an eToken balance to an underlying amount, taking into account current exchange rate
         // @param balance eToken balance, in internal book-keeping units (18 decimals)
         // @return Amount in underlying units, (same decimals as underlying token)
+        // balance in eToken is scaled by (wrappedTokenDecimals - mainTokenDecimals)
+        // to account for a more precise rate in case the mainToken has lower than 18 decimals
         try _eulerToken.convertBalanceToUnderlying(1e18 * 10**_digitsDifference) returns (uint256 rate) {
             return rate;
         } catch (bytes memory revertData) {
