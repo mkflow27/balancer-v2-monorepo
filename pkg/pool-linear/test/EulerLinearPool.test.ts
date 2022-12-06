@@ -30,6 +30,8 @@ describe('EulerLinearPool', function () {
   let mockLendingPool: Contract;
   let trader: SignerWithAddress, lp: SignerWithAddress, owner: SignerWithAddress;
 
+  // Euler Mainnet
+  const EULER_PROTOCOL = '0x27182842E098f60e3D576794A5bFFb0777E025d3';
   const POOL_SWAP_FEE_PERCENTAGE = fp(0.01);
 
   before('setup', async () => {
@@ -53,7 +55,14 @@ describe('EulerLinearPool', function () {
     vault = await Vault.create();
     const queries = await deploy('v2-standalone-utils/BalancerQueries', { args: [vault.address] });
     poolFactory = await deploy('EulerLinearPoolFactory', {
-      args: [vault.address, vault.getFeesProvider().address, queries.address, 'factoryVersion', 'poolVersion'],
+      args: [
+        vault.address,
+        vault.getFeesProvider().address,
+        queries.address,
+        'factoryVersion',
+        'poolVersion',
+        EULER_PROTOCOL,
+      ],
     });
     console.log('test');
   });

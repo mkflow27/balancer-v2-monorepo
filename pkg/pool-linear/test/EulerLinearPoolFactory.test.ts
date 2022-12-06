@@ -19,6 +19,8 @@ describe('EulerLinearPoolFactory', function () {
   let mainToken: Token, wrappedToken: Token;
   let factoryVersion: string, poolVersion: string;
 
+  // Euler Mainnet
+  const EULER_PROTOCOL = '0x27182842E098f60e3D576794A5bFFb0777E025d3';
   const NAME = 'Euler Balancer Linear Pool Token';
   const SYMBOL = 'ELPT';
   const UPPER_TARGET = fp(2000);
@@ -44,7 +46,14 @@ describe('EulerLinearPoolFactory', function () {
       deployment: 'test-deployment',
     });
     factory = await deploy('EulerLinearPoolFactory', {
-      args: [vault.address, vault.getFeesProvider().address, queries.address, factoryVersion, poolVersion],
+      args: [
+        vault.address,
+        vault.getFeesProvider().address,
+        queries.address,
+        factoryVersion,
+        poolVersion,
+        EULER_PROTOCOL,
+      ],
     });
     creationTime = await currentTimestamp();
 
@@ -77,19 +86,21 @@ describe('EulerLinearPoolFactory', function () {
 
     sharedBeforeEach('create pool', async () => {
       pool = await createPool();
-      console.log('created pool');
     });
 
     it('sets the vault', async () => {
-      console.log('setting the vault');
       expect(await pool.getVault()).to.equal(vault.address);
     });
 
-    it('checks the factory version',async () => {
+    it('checks the factory version', async () => {
       expect(await factory.version()).to.equal(factoryVersion);
     });
 
-    it('checks the pool version in the factory',async () => {
+    it('checks factory awareness of EULER_PROTOCOL contract', async () => {
+      expect(await factory.EULER_PROTOCOL()).to.equal(EULER_PROTOCOL);
+    });
+
+    it('checks the pool version in the factory', async () => {
       expect(await factory.getPoolVersion()).to.equal(poolVersion);
     });
 
@@ -119,6 +130,19 @@ describe('EulerLinearPoolFactory', function () {
       const rebalancer = await deployedAt('EulerLinearPoolRebalancer', assetManager);
 
       expect(await rebalancer.getPool()).to.equal(pool.address);
+    });
+
+    it('creates a rebalancer aware of EULER_PROTOCOL contract', async () => {
+      const poolId = await pool.getPoolId();
+
+      const { assetManager } = await vault.getPoolTokenInfo(poolId, tokens.first);
+
+      const rebalancer = await deployedAt('EulerLinearPoolRebalancer', assetManager);
+
+      // The wrapped token does not hold the mainToken but rather
+      // euler network contract holds the mainTokens. The rebalancer needs
+      // to be aware of this address to approve it during wrapping
+      expect(await rebalancer.EULER_PROTOCOL()).to.equal(EULER_PROTOCOL);
     });
 
     it('sets swap fee', async () => {
