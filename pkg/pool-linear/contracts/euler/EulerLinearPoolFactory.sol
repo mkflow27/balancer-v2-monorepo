@@ -29,6 +29,7 @@ import "@balancer-labs/v2-solidity-utils/contracts/openzeppelin/ReentrancyGuard.
 
 import "./EulerLinearPool.sol";
 import "./EulerLinearPoolRebalancer.sol";
+import "./interfaces/IEulerLinearPoolRebalancer.sol";
 
 contract EulerLinearPoolFactory is
     ILastCreatedPoolFactory,
@@ -46,15 +47,20 @@ contract EulerLinearPoolFactory is
     address private _lastCreatedPool;
     string private _poolVersion;
 
+    //solhint-disable-next-line var-name-mixedcase
+    address public EULER_PROTOCOL;
+
     constructor(
         IVault vault,
         IProtocolFeePercentagesProvider protocolFeeProvider,
         IBalancerQueries queries,
         string memory factoryVersion,
-        string memory poolVersion
+        string memory poolVersion,
+        address _eulerProtocol
     ) BasePoolFactory(vault, protocolFeeProvider, type(EulerLinearPool).creationCode) Version(factoryVersion) {
         _queries = queries;
         _poolVersion = poolVersion;
+        EULER_PROTOCOL = _eulerProtocol;
     }
 
     function getLastCreatedPool() external view override returns (address) {
@@ -103,7 +109,7 @@ contract EulerLinearPoolFactory is
 
         bytes memory rebalancerCreationCode = abi.encodePacked(
             type(EulerLinearPoolRebalancer).creationCode,
-            abi.encode(getVault(), _queries)
+            abi.encode(getVault(), _queries, EULER_PROTOCOL)
         );
         address expectedRebalancerAddress = Create2.computeAddress(rebalancerSalt, keccak256(rebalancerCreationCode));
 
@@ -134,6 +140,11 @@ contract EulerLinearPoolFactory is
         // predicted its deployment address.
         address actualRebalancerAddress = Create2.deploy(0, rebalancerSalt, rebalancerCreationCode);
         require(expectedRebalancerAddress == actualRebalancerAddress, "Rebalancer deployment failed");
+
+        require(
+            EULER_PROTOCOL == IEulerLinearPoolRebalancer(actualRebalancerAddress).EULER_PROTOCOL(),
+            "Rebalancer not aware of EULER_PROTOCOL"
+        );
 
         // We don't return the Rebalancer's address, but that can be queried in the Vault by calling `getPoolTokenInfo`.
         return pool;
