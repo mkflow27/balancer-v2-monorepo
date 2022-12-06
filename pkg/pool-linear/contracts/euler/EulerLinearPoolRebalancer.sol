@@ -24,21 +24,26 @@ import "../LinearPoolRebalancer.sol";
 contract EulerLinearPoolRebalancer is LinearPoolRebalancer {
     using SafeERC20 for IERC20;
 
+    //solhint-disable-next-line var-name-mixedcase
+    address public EULER_PROTOCOL;
+
     // These Rebalancers can only be deployed from a factory to work around a circular dependency: the Pool must know
     // the address of the Rebalancer in order to register it, and the Rebalancer must know the address of the Pool
     // during construction.
-    constructor(IVault vault, IBalancerQueries queries)
-        LinearPoolRebalancer(ILinearPool(ILastCreatedPoolFactory(msg.sender).getLastCreatedPool()), vault, queries)
-    {
-        // solhint-disable-previous-line no-empty-blocks
+    constructor(
+        IVault vault,
+        IBalancerQueries queries,
+        address _eulerProtocol
+    ) LinearPoolRebalancer(ILinearPool(ILastCreatedPoolFactory(msg.sender).getLastCreatedPool()), vault, queries) {
+        EULER_PROTOCOL = _eulerProtocol;
     }
 
     function _wrapTokens(uint256 amount) internal override {
         // No referral code, depositing from underlying (i.e. DAI, USDC, etc. instead of aDAI or aUSDC). Before we can
         // deposit however, we need to approve the wrapper in the underlying token.
 
-        // approve Euler Mainnet
-        _mainToken.safeApprove(0x27182842E098f60e3D576794A5bFFb0777E025d3, amount);
+        // approve EULER_PROTOCOL
+        _mainToken.safeApprove(EULER_PROTOCOL, amount);
         IEulerTokenMinimal(address(_wrappedToken)).deposit(0, amount);
     }
 
