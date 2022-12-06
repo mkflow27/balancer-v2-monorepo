@@ -85,6 +85,14 @@ describe('EulerLinearPoolFactory', function () {
       expect(await pool.getVault()).to.equal(vault.address);
     });
 
+    it('checks the factory version',async () => {
+      expect(await factory.version()).to.equal(factoryVersion);
+    });
+
+    it('checks the pool version in the factory',async () => {
+      expect(await factory.getPoolVersion()).to.equal(poolVersion);
+    });
+
     it('registers tokens in the vault', async () => {
       const poolId = await pool.getPoolId();
       const poolTokens = await vault.getPoolTokens(poolId);
