@@ -25,6 +25,11 @@
         "internalType": "string",
         "name": "poolVersion",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "_eulerProtocol",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -48,6 +53,19 @@
     ],
     "name": "PoolCreated",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "EULER_PROTOCOL",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [

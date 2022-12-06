@@ -10,10 +10,28 @@
         "internalType": "contract IBalancerQueries",
         "name": "queries",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_eulerProtocol",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "EULER_PROTOCOL",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [],
