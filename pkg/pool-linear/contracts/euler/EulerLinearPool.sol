@@ -22,7 +22,7 @@ import "@balancer-labs/v2-pool-utils/contracts/Version.sol";
 import "../LinearPool.sol";
 
 contract EulerLinearPool is LinearPool, Version {
-    IEulerTokenMinimal private immutable _eulerToken;
+    // IEulerTokenMinimal private immutable _eulerToken;
     uint256 private immutable _digitsDifference;
 
     struct ConstructorArgs {
@@ -56,16 +56,17 @@ contract EulerLinearPool is LinearPool, Version {
         )
         Version(args.version)
     {
-        IEulerTokenMinimal eulerToken = IEulerTokenMinimal(address(args.wrappedToken));
+        // IEulerTokenMinimal eulerToken = IEulerTokenMinimal(address(args.wrappedToken));
 
-        _eulerToken = eulerToken;
+        // _eulerToken = eulerToken;
         uint256 mainTokenDecimals = IEulerTokenMinimal(address(args.mainToken)).decimals();
 
         // Euler tokens always have 18 decimals
         // https://docs.euler.finance/developers/getting-started/contract-reference#decimals
         _digitsDifference = 18 - mainTokenDecimals;
 
-        _require(address(args.mainToken) == eulerToken.underlyingAsset(), Errors.TOKENS_MISMATCH);
+        // solhint-disable-next-line max-line-length
+        _require(address(args.mainToken) == IEulerTokenMinimal(address(args.wrappedToken)).underlyingAsset(), Errors.TOKENS_MISMATCH);
     }
 
     function _toAssetManagerArray(ConstructorArgs memory args) private pure returns (address[] memory) {
@@ -84,7 +85,9 @@ contract EulerLinearPool is LinearPool, Version {
         // @return Amount in underlying units, (same decimals as underlying token)
         // balance in eToken is scaled by (wrappedTokenDecimals - mainTokenDecimals)
         // to account for a more precise rate in case the mainToken has lower than 18 decimals
-        try _eulerToken.convertBalanceToUnderlying(1e18 * 10**_digitsDifference) returns (uint256 rate) {
+                
+        // solhint-disable-next-line max-line-length
+        try IEulerTokenMinimal(address(getWrappedToken())).convertBalanceToUnderlying(1e18 * 10**_digitsDifference) returns (uint256 rate) {
             return rate;
         } catch (bytes memory revertData) {
             ExternalCallLib.bubbleUpNonMaliciousRevert(revertData);
