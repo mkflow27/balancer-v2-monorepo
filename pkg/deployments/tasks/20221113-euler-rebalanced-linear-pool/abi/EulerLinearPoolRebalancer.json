@@ -22,7 +22,7 @@
   },
   {
     "inputs": [],
-    "name": "EULER_PROTOCOL",
+    "name": "eulerProtocol",
     "outputs": [
       {
         "internalType": "address",
