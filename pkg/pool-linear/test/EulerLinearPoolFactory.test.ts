@@ -58,7 +58,7 @@ describe('EulerLinearPoolFactory', function () {
     creationTime = await currentTimestamp();
 
     mainToken = await Token.create('DAI');
-    const wrappedTokenInstance = await deploy('MockMaliciousEulerToken', {
+    const wrappedTokenInstance = await deploy('MockEulerToken', {
       args: ['cDAI', 'cDAI', 18, mainToken.address],
     });
     wrappedToken = await Token.deployedAt(wrappedTokenInstance.address);

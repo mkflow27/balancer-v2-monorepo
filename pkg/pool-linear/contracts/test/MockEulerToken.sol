@@ -19,7 +19,7 @@ import "@balancer-labs/v2-solidity-utils/contracts/test/TestToken.sol";
 import "@balancer-labs/v2-pool-utils/contracts/test/MaliciousQueryReverter.sol";
 
 
-contract MockMaliciousEulerToken is TestToken, MaliciousQueryReverter{
+contract MockEulerToken is TestToken, MaliciousQueryReverter{
     // from Euler docs:
     // in order to invest an asset to earn interest, you need to `deposit` into an eToken
 
