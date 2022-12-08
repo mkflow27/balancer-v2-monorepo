@@ -22,7 +22,6 @@ import "@balancer-labs/v2-pool-utils/contracts/Version.sol";
 import "../LinearPool.sol";
 
 contract EulerLinearPool is LinearPool, Version {
-    // IEulerTokenMinimal private immutable _eulerToken;
     uint256 private immutable _digitsDifference;
 
     struct ConstructorArgs {
@@ -56,9 +55,6 @@ contract EulerLinearPool is LinearPool, Version {
         )
         Version(args.version)
     {
-        // IEulerTokenMinimal eulerToken = IEulerTokenMinimal(address(args.wrappedToken));
-
-        // _eulerToken = eulerToken;
         uint256 mainTokenDecimals = IEulerTokenMinimal(address(args.mainToken)).decimals();
 
         // Euler tokens always have 18 decimals

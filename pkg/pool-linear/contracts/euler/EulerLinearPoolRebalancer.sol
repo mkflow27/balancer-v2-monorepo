@@ -39,17 +39,17 @@ contract EulerLinearPoolRebalancer is LinearPoolRebalancer {
     }
 
     function _wrapTokens(uint256 amount) internal override {
-        // No referral code, depositing from underlying (i.e. DAI, USDC, etc. instead of aDAI or aUSDC). Before we can
-        // deposit however, we need to approve the wrapper in the underlying token.
 
         // approve eulerProtocol
         _mainToken.safeApprove(eulerProtocol, amount);
+
+        // Transfer underlying tokens from sender to the Euler pool, and increase account's eTokens
+        // param: subAccountId 0 for primary, 1-255 for a sub-account
+        // param: amount In underlying units (use max uint256 for full underlying token balance)
         IEulerTokenMinimal(address(_wrappedToken)).deposit(0, amount);
     }
 
     function _unwrapTokens(uint256 amount) internal override {
-        // Withdrawing into underlying (i.e. DAI, USDC, etc. instead of aDAI or aUSDC). Approvals are not necessary here
-        // as the wrapped token is simply burnt.
 
         uint256 underlyingAmount = IEulerTokenMinimal(address(_wrappedToken)).convertBalanceToUnderlying(amount);
 
