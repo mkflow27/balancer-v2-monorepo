@@ -22,7 +22,7 @@ describeForkTest('EulerLinearPoolFactory', 'mainnet', 15961400, function () {
 
   const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
   const eUSDC = '0xEb91861f8A4e1C12333F42DCE8fB0Ecdc28dA716';
-  const USDC_LENDING_POOL = '0xEb91861f8A4e1C12333F42DCE8fB0Ecdc28dA716';
+  //const eUSDC = '0xEb91861f8A4e1C12333F42DCE8fB0Ecdc28dA716';
   const EULER_PROTOCOL = '0x27182842E098f60e3D576794A5bFFb0777E025d3';
 
   const USDC_SCALING = bn(1e12); // USDC has 6 decimals, so its scaling factor is 1e12
@@ -319,10 +319,10 @@ describeForkTest('EulerLinearPoolFactory', 'mainnet', 15961400, function () {
         MAX_UINT256
       );
 
-      await setCode(USDC_LENDING_POOL, getArtifact('v2-pool-linear/MockMaliciousEulerToken').deployedBytecode);
-      const mockLendingPool = await deployedAt('v2-pool-linear/MockMaliciousEulerToken', USDC_LENDING_POOL);
+      await setCode(eUSDC, getArtifact('v2-pool-linear/MockMaliciousEulerToken').deployedBytecode);
+      const mockMaliciousEulerToken = await deployedAt('v2-pool-linear/MockMaliciousEulerToken', eUSDC);
 
-      await mockLendingPool.setRevertType(2); // Type 2 is malicious swap query revert
+      await mockMaliciousEulerToken.setRevertType(2); // Type 2 is malicious swap query revert
       await expect(rebalancer.rebalance(other.address)).to.be.revertedWith('BAL#357'); // MALICIOUS_QUERY_REVERT
     })
   })
