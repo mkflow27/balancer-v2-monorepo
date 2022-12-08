@@ -125,11 +125,11 @@ describe('EulerLinearPool', function () {
         expect(await pool.getWrappedTokenRate()).to.be.eq(bn(1e18));
 
         // change exchangeRate at the EulerToken
-        await eulerToken.setExchangeRateMultiplicator(2);
+        await eulerToken.setExchangeRateMultiplier(2);
         expect(await pool.getWrappedTokenRate()).to.be.eq(bn(2e18));
 
         // change exchangeRate at the EulerToken
-        await eulerToken.setExchangeRateMultiplicator(1);
+        await eulerToken.setExchangeRateMultiplier(1);
         expect(await pool.getWrappedTokenRate()).to.be.eq(bn(1e18));
       });
     });

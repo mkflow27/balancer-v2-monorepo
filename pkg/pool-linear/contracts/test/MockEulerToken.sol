@@ -32,7 +32,7 @@ contract MockEulerToken is TestToken, MaliciousQueryReverter{
     // TestToken already has approve. Meaning: Euler Market
     // is able to transfer tokens from the vault
 
-    uint256 public exchangeRateMultiplicator;
+    uint256 public exchangeRateMultiplier;
 
     address public immutable ASSET;
     constructor(
@@ -41,18 +41,18 @@ contract MockEulerToken is TestToken, MaliciousQueryReverter{
         uint8 decimals,
         address asset
     ) TestToken(name, symbol, decimals) {
-        exchangeRateMultiplicator = 1;
+        exchangeRateMultiplier = 1;
         ASSET = asset;
     }
 
     function convertBalanceToUnderlying(uint balance) external view returns (uint) {
         maybeRevertMaliciously();
-        return balance*exchangeRateMultiplicator;
+        return balance*exchangeRateMultiplier;
     }
 
-    function setExchangeRateMultiplicator(uint256 _exchangeRateMultiplicator) external {
-        require(_exchangeRateMultiplicator < 3, "Cannot set exchangeRateMultiplicator bigger 3");
-        exchangeRateMultiplicator = _exchangeRateMultiplicator;
+    function setExchangeRateMultiplier(uint256 _exchangeRateMultiplier) external {
+        require(_exchangeRateMultiplier < 3, "Cannot set exchangeRateMultiplier bigger 3");
+        exchangeRateMultiplier = _exchangeRateMultiplier;
     }
 
     function underlyingAsset() external view returns (address) {
