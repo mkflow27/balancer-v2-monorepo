@@ -48,7 +48,7 @@ contract EulerLinearPoolFactory is
     string private _poolVersion;
 
     //solhint-disable-next-line var-name-mixedcase
-    address public EULER_PROTOCOL;
+    address public eulerProtocol;
 
     constructor(
         IVault vault,
@@ -60,7 +60,7 @@ contract EulerLinearPoolFactory is
     ) BasePoolFactory(vault, protocolFeeProvider, type(EulerLinearPool).creationCode) Version(factoryVersion) {
         _queries = queries;
         _poolVersion = poolVersion;
-        EULER_PROTOCOL = _eulerProtocol;
+        eulerProtocol = _eulerProtocol;
     }
 
     function getLastCreatedPool() external view override returns (address) {
@@ -109,7 +109,7 @@ contract EulerLinearPoolFactory is
 
         bytes memory rebalancerCreationCode = abi.encodePacked(
             type(EulerLinearPoolRebalancer).creationCode,
-            abi.encode(getVault(), _queries, EULER_PROTOCOL)
+            abi.encode(getVault(), _queries, eulerProtocol)
         );
         address expectedRebalancerAddress = Create2.computeAddress(rebalancerSalt, keccak256(rebalancerCreationCode));
 
@@ -142,8 +142,8 @@ contract EulerLinearPoolFactory is
         require(expectedRebalancerAddress == actualRebalancerAddress, "Rebalancer deployment failed");
 
         require(
-            EULER_PROTOCOL == IEulerLinearPoolRebalancer(actualRebalancerAddress).EULER_PROTOCOL(),
-            "Rebalancer not aware of EULER_PROTOCOL"
+            eulerProtocol == IEulerLinearPoolRebalancer(actualRebalancerAddress).eulerProtocol(),
+            "Rebalancer not aware of eulerProtocol"
         );
 
         // We don't return the Rebalancer's address, but that can be queried in the Vault by calling `getPoolTokenInfo`.

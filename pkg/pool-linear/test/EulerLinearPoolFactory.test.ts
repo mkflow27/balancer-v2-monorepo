@@ -97,7 +97,7 @@ describe('EulerLinearPoolFactory', function () {
     });
 
     it('checks factory awareness of EULER_PROTOCOL contract', async () => {
-      expect(await factory.EULER_PROTOCOL()).to.equal(EULER_PROTOCOL);
+      expect(await factory.eulerProtocol()).to.equal(EULER_PROTOCOL);
     });
 
     it('checks the pool version in the factory', async () => {
@@ -142,7 +142,7 @@ describe('EulerLinearPoolFactory', function () {
       // The wrapped token does not hold the mainToken but rather
       // euler network contract holds the mainTokens. The rebalancer needs
       // to be aware of this address to approve it during wrapping
-      expect(await rebalancer.EULER_PROTOCOL()).to.equal(EULER_PROTOCOL);
+      expect(await rebalancer.eulerProtocol()).to.equal(EULER_PROTOCOL);
     });
 
     it('sets swap fee', async () => {

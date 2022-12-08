@@ -16,8 +16,8 @@ pragma solidity ^0.7.0;
 
 interface IEulerLinearPoolRebalancer {
     /**
-     * @dev return address of the EULER_PROTOCOL
+     * @dev return address of the eulerProtocol
      */
     //solhint-disable-next-line func-name-mixedcase
-    function EULER_PROTOCOL() external view returns (address);
+    function eulerProtocol() external view returns (address);
 }
