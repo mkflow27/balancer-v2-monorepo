@@ -143,11 +143,11 @@ describeForkTest('EulerLinearPoolFactory', 'mainnet', 15961400, function () {
     });
 
     it('check factory aware of EULER_PROTOCOL', async () => {
-      expect(await factory.EULER_PROTOCOL()).to.equal(EULER_PROTOCOL);
+      expect(await factory.eulerProtocol()).to.equal(EULER_PROTOCOL);
     })
 
     it('check Rebalancer aware of EULER_PROTOCOL',async () => {
-      expect(await rebalancer.EULER_PROTOCOL()).to.equal(EULER_PROTOCOL);
+      expect(await rebalancer.eulerProtocol()).to.equal(EULER_PROTOCOL);
     })
 
     it('check pool version',async () => {
@@ -318,8 +318,8 @@ describeForkTest('EulerLinearPoolFactory', 'mainnet', 15961400, function () {
         MAX_UINT256
       );
 
-      await setCode(eUSDC, getArtifact('v2-pool-linear/MockMaliciousEulerToken').deployedBytecode);
-      const mockMaliciousEulerToken = await deployedAt('v2-pool-linear/MockMaliciousEulerToken', eUSDC);
+      await setCode(eUSDC, getArtifact('v2-pool-linear/MockEulerToken').deployedBytecode);
+      const mockMaliciousEulerToken = await deployedAt('v2-pool-linear/MockEulerToken', eUSDC);
 
       await mockMaliciousEulerToken.setRevertType(2); // Type 2 is malicious swap query revert
       await expect(rebalancer.rebalance(other.address)).to.be.revertedWith('BAL#357'); // MALICIOUS_QUERY_REVERT
