@@ -25,7 +25,7 @@ contract EulerLinearPoolRebalancer is LinearPoolRebalancer {
     using SafeERC20 for IERC20;
 
     //solhint-disable-next-line var-name-mixedcase
-    address public eulerProtocol;
+    address public immutable eulerProtocol;
 
     // These Rebalancers can only be deployed from a factory to work around a circular dependency: the Pool must know
     // the address of the Rebalancer in order to register it, and the Rebalancer must know the address of the Pool

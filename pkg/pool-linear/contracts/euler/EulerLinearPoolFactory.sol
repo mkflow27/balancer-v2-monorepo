@@ -48,7 +48,7 @@ contract EulerLinearPoolFactory is
     string private _poolVersion;
 
     //solhint-disable-next-line var-name-mixedcase
-    address public eulerProtocol;
+    address public immutable eulerProtocol;
 
     constructor(
         IVault vault,
