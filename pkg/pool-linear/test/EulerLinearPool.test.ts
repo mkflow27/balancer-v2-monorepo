@@ -27,7 +27,7 @@ describe('EulerLinearPool', function () {
   let vault: Vault;
   let pool: LinearPool, tokens: TokenList, mainToken: Token, wrappedToken: Token;
   let poolFactory: Contract;
-  let mockLendingPool: Contract;
+  let eulerToken: Contract;
   let trader: SignerWithAddress, lp: SignerWithAddress, owner: SignerWithAddress;
 
   // Euler Mainnet
@@ -46,7 +46,7 @@ describe('EulerLinearPool', function () {
     wrappedToken = await Token.deployedAt(wrappedTokenInstance.address);
 
     tokens = new TokenList([mainToken, wrappedToken]).sort();
-    mockLendingPool = wrappedTokenInstance;
+    eulerToken = wrappedTokenInstance;
 
     await tokens.mint({ to: [lp, trader], amount: fp(100) });
   });
@@ -125,18 +125,18 @@ describe('EulerLinearPool', function () {
         expect(await pool.getWrappedTokenRate()).to.be.eq(bn(1e18));
 
         // change exchangeRate at the EulerToken
-        await mockLendingPool.setExchangeRateMultiplicator(2);
+        await eulerToken.setExchangeRateMultiplicator(2);
         expect(await pool.getWrappedTokenRate()).to.be.eq(bn(2e18));
 
         // change exchangeRate at the EulerToken
-        await mockLendingPool.setExchangeRateMultiplicator(1);
+        await eulerToken.setExchangeRateMultiplicator(1);
         expect(await pool.getWrappedTokenRate()).to.be.eq(bn(1e18));
       });
     });
 
     context('when Euler reverts maliciously to impersonate a swap query', () => {
       sharedBeforeEach('make Euler lending pool start reverting', async () => {
-        await mockLendingPool.setRevertType(RevertType.MaliciousSwapQuery);
+        await eulerToken.setRevertType(RevertType.MaliciousSwapQuery);
       });
 
       it('reverts with MALICIOUS_QUERY_REVERT', async () => {
@@ -146,7 +146,7 @@ describe('EulerLinearPool', function () {
 
     context('when Euler reverts maliciously to impersonate a join/exit query', () => {
       sharedBeforeEach('make Euler lending pool start reverting', async () => {
-        await mockLendingPool.setRevertType(RevertType.MaliciousJoinExitQuery);
+        await eulerToken.setRevertType(RevertType.MaliciousJoinExitQuery);
       });
 
       it('reverts with MALICIOUS_QUERY_REVERT', async () => {
@@ -184,7 +184,7 @@ describe('EulerLinearPool', function () {
       });
 
       sharedBeforeEach('make Euler lending pool start reverting', async () => {
-        await mockLendingPool.setRevertType(RevertType.MaliciousSwapQuery);
+        await eulerToken.setRevertType(RevertType.MaliciousSwapQuery);
       });
 
       it('reverts with MALICIOUS_QUERY_REVERT', async () => {
