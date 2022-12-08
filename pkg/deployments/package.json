@@ -29,8 +29,7 @@
     "lint": "eslint . --ext .ts --ignore-path ../../.eslintignore  --max-warnings 0",
     "prepack": "yarn build",
     "test": "hardhat test ./**/test/*.ts",
-    "ci:prepare-config": "ts-node ci/prepare-config.ts",
-    "test-euler": "hardhat test ./**/20221113*/**/test/*.ts"
+    "ci:prepare-config": "ts-node ci/prepare-config.ts"
   },
   "devDependencies": {
     "@balancer-labs/balancer-js": "workspace:*",
