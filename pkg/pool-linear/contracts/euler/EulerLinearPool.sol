@@ -55,7 +55,7 @@ contract EulerLinearPool is LinearPool, Version {
         )
         Version(args.version)
     {
-        uint256 mainTokenDecimals = IEulerTokenMinimal(address(args.mainToken)).decimals();
+        uint256 mainTokenDecimals = ERC20(address(args.mainToken)).decimals();
 
         // Euler tokens always have 18 decimals
         // https://docs.euler.finance/developers/getting-started/contract-reference#decimals
