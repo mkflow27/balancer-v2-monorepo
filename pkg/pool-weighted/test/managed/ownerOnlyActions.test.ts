@@ -9,6 +9,7 @@ import TokenList from '@balancer-labs/v2-helpers/src/models/tokens/TokenList';
 import { fp } from '@balancer-labs/v2-helpers/src/numbers';
 import { ZERO_ADDRESS } from '@balancer-labs/v2-helpers/src/constants';
 import { ProtocolFee } from '@balancer-labs/v2-helpers/src/models/vault/types';
+import { sharedBeforeEach } from '@balancer-labs/v2-common/sharedBeforeEach';
 
 describe('ManagedPool owner only actions', () => {
   let pool: Contract;
@@ -18,6 +19,7 @@ describe('ManagedPool owner only actions', () => {
     const tokens = await TokenList.create(2, { sorted: true });
     const addRemoveTokenLib = await deploy('ManagedPoolAddRemoveTokenLib');
     const math = await deploy('ExternalWeightedMath');
+    const recoveryModeHelper = await deploy('v2-pool-utils/RecoveryModeHelper', { args: [vault.address] });
     const circuitBreakerLib = await deploy('CircuitBreakerLib');
     pool = await deploy('MockManagedPool', {
       args: [
@@ -26,6 +28,7 @@ describe('ManagedPool owner only actions', () => {
           vault: vault.address,
           protocolFeeProvider: vault.getFeesProvider().address,
           weightedMath: math.address,
+          recoveryModeHelper: recoveryModeHelper.address,
           pauseWindowDuration: 0,
           bufferPeriodDuration: 0,
           version: '',

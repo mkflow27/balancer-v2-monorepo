@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### New Deployments
+
+- Deployed `BatchRelayerLibrary` V5 to all networks.
+- Deployed `L2BalancerPseudoMinter` to Goerli, Arbitrum, Polygon, Optimism and Gnosis.
+- Deployed `VotingEscrowDelegationProxy` and `NullVotingEscrow` to Goerli, Arbitrum, Polygon, Optimism and Gnosis.
+- Deployed `WeightedPoolFactory` V4 to all networks.
+- Deployed `ComposableStablePoolFactory` V4 to all networks.
+- Deployed `ChildChainGaugeFactory` and `ChildChainGauge` to Goerli, Arbitrum, Polygon, Optimism and Gnosis.
+
+### Deprecations
+
+- Deprecated `20220916-batch-relayer-v4`.
+- Deprecated `20230206-weighted-pool-v3`.
+- Deprecated `20230206-composable-stable-pool-v3`.
+
 ## 3.2.0 (2023-02-24)
 
 ### New Networks
