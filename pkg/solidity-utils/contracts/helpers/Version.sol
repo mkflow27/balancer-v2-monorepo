@@ -14,13 +14,26 @@
 
 pragma solidity ^0.7.0;
 
-import "../helpers/CodeDeployer.sol";
+import "@balancer-labs/v2-interfaces/contracts/solidity-utils/helpers/IVersion.sol";
 
-contract CodeDeployerFactory {
-    event CodeDeployed(address destination);
+/**
+ * @notice Retrieves a contract's version set at creation time from storage.
+ */
+contract Version is IVersion {
+    string private _version;
 
-    function deploy(bytes memory data, bool preventExecution) external {
-        address destination = CodeDeployer.deploy(data, preventExecution);
-        emit CodeDeployed(destination);
+    constructor(string memory version) {
+        _setVersion(version);
+    }
+
+    function version() external view override returns (string memory) {
+        return _version;
+    }
+
+    /**
+     * @dev Internal setter that allows this contract to be used in proxies.
+     */
+    function _setVersion(string memory newVersion) internal {
+        _version = newVersion;
     }
 }

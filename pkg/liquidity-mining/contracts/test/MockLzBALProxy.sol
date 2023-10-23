@@ -13,14 +13,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
-import "../helpers/CodeDeployer.sol";
-
-contract CodeDeployerFactory {
-    event CodeDeployed(address destination);
-
-    function deploy(bytes memory data, bool preventExecution) external {
-        address destination = CodeDeployer.deploy(data, preventExecution);
-        emit CodeDeployed(destination);
+contract MockLzBALProxy {
+    function sharedDecimals() external pure returns (uint8) {
+        return 6;
     }
 }

@@ -12,28 +12,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity ^0.7.0;
-
-import "@balancer-labs/v2-interfaces/contracts/pool-utils/IVersion.sol";
+pragma solidity >=0.7.0 <0.9.0;
 
 /**
- * @notice Retrieves a contract's version set at creation time from storage.
+ * @notice Standard token bridging interface, common to Optimism and Base networks.
  */
-contract Version is IVersion {
-    string private _version;
-
-    constructor(string memory version) {
-        _setVersion(version);
-    }
-
-    function version() external view override returns (string memory) {
-        return _version;
-    }
-
-    /**
-     * @dev Internal setter that allows this contract to be used in proxies.
-     */
-    function _setVersion(string memory newVersion) internal {
-        _version = newVersion;
-    }
+interface IL1StandardBridge {
+    function depositERC20To(
+        address _l1Token,
+        address _l2Token,
+        address _to,
+        uint256 _amount,
+        uint32 _l2Gas,
+        bytes calldata _data
+    ) external;
 }

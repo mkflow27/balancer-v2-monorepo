@@ -15,33 +15,35 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
-
 import "@balancer-labs/v2-solidity-utils/contracts/helpers/SingletonAuthentication.sol";
 
 import "../BaseGaugeFactory.sol";
-import "./AvalancheRootGauge.sol";
+import "./BaseRootGauge.sol";
 
-contract AvalancheRootGaugeFactory is BaseGaugeFactory, SingletonAuthentication {
+contract BaseRootGaugeFactory is BaseGaugeFactory, SingletonAuthentication {
     constructor(
         IVault vault,
         IMainnetBalancerMinter minter,
-        ILayerZeroBALProxy lzBALProxy
-    ) BaseGaugeFactory(address(new AvalancheRootGauge(minter, lzBALProxy))) SingletonAuthentication(vault) {
+        IL1StandardBridge baseL1StandardBridge,
+        address baseBal
+    )
+        BaseGaugeFactory(address(new BaseRootGauge(minter, baseL1StandardBridge, baseBal)))
+        SingletonAuthentication(vault)
+    {
         // solhint-disable-previous-line no-empty-blocks
     }
 
     /**
-     * @notice Deploys a new gauge which bridges all of its BAL allowance to a single recipient on Avalanche.
-     * @dev Care must be taken to ensure that gauges deployed from this factory are suitable before they are added
-     * to the GaugeController.
+     * @notice Deploys a new gauge which bridges all of its BAL allowance to a single recipient on Optimism.
+     * @dev Care must be taken to ensure that gauges deployed from this factory are
+     * suitable before they are added to the GaugeController.
      * @param recipient The address to receive BAL minted from the gauge
      * @param relativeWeightCap The relative weight cap for the created gauge
      * @return The address of the deployed gauge
      */
     function create(address recipient, uint256 relativeWeightCap) external returns (address) {
         address gauge = _create();
-        AvalancheRootGauge(gauge).initialize(recipient, relativeWeightCap);
+        BaseRootGauge(gauge).initialize(recipient, relativeWeightCap);
         return gauge;
     }
 }

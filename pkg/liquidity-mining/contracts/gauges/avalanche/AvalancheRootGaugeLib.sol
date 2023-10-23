@@ -14,13 +14,15 @@
 
 pragma solidity ^0.7.0;
 
-import "../helpers/CodeDeployer.sol";
+library AvalancheRootGaugeLib {
+    /// @dev Truncates given amount to the maximum allowed precision.
+    function removeDust(uint256 amount, uint256 dustModulo) internal pure returns (uint256) {
+        uint256 dust = amount % dustModulo;
+        return amount - dust;
+    }
 
-contract CodeDeployerFactory {
-    event CodeDeployed(address destination);
-
-    function deploy(bytes memory data, bool preventExecution) external {
-        address destination = CodeDeployer.deploy(data, preventExecution);
-        emit CodeDeployed(destination);
+    /// @dev Returns given address as bytes32, padded with zeroes to the left.
+    function bytes32Recipient(address recipient) internal pure returns (bytes32) {
+        return bytes32(uint256(uint160(recipient)));
     }
 }

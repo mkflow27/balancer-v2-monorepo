@@ -27,6 +27,7 @@ export type OutputReference = {
 
 export async function setupRelayerEnvironment(): Promise<{
   user: SignerWithAddress;
+  admin: SignerWithAddress;
   other: SignerWithAddress;
   vault: Vault;
   relayer: Contract;
@@ -38,7 +39,9 @@ export async function setupRelayerEnvironment(): Promise<{
   const vault = await Vault.create({ admin });
 
   // Deploy Relayer
-  const relayerLibrary = await deploy('MockBatchRelayerLibrary', { args: [vault.address, ZERO_ADDRESS, ZERO_ADDRESS] });
+  const relayerLibrary = await deploy('MockBatchRelayerLibrary', {
+    args: [vault.address, ZERO_ADDRESS, ZERO_ADDRESS, false],
+  });
   const relayer = await deployedAt('BalancerRelayer', await relayerLibrary.getEntrypoint());
 
   // Authorize Relayer for all actions
@@ -53,7 +56,7 @@ export async function setupRelayerEnvironment(): Promise<{
   // Approve relayer by sender
   await vault.setRelayerApproval(user, relayer, true);
 
-  return { user, other, vault, relayer, relayerLibrary };
+  return { user, admin, other, vault, relayer, relayerLibrary };
 }
 
 export async function encodeJoinPool(
